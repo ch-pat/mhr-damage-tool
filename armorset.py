@@ -18,6 +18,7 @@ class ArmorSet():
         self.crit_multiplier:       float = 1.25
         self.powercharm:            bool = powercharm
         self.powertalon:            bool = powertalon
+        self.active_skills_string:  str = active_skills
         self.active_skills:         dict = self.parse_skills(active_skills)
         self.apply_skills()         # Applies skills to change the above stats 
         self.apply_powercharms()    # Applies powercharm / powertalon buffs after skills
@@ -118,7 +119,7 @@ def compare_armorsets(weapons: list, skillsets: list, verbose: bool = False):
     if verbose:
         analyzed = sorted(analyzed, key=lambda x: x.effective_raw)
         for armorset in analyzed:
-            print(f"{armorset.weapon.name} with {armorset.active_skills.keys()} = {armorset.effective_raw}")
+            print(f"{armorset.weapon.name}\twith {armorset.active_skills_string}\t\t= {armorset.effective_raw}")
     return best
 
 if __name__ == "__main__":
@@ -132,7 +133,9 @@ if __name__ == "__main__":
 
     skillsets = [
         'AB7 WEX3 CE2 Focus3',
-        'AB7 WEX3 RESENTMENT2 FOCUS3'
+        'AB7 WEX3 RESENTMENT2 Focus3',
+        'AB7 WEX3 CB1 Focus3',
+        'AB7 WEX3 CE3 Focus3'
     ]
 
     print(compare_armorsets(weapons, skillsets, True))
