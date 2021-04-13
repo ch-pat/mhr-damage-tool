@@ -7,6 +7,9 @@ class ArmorSet():
             'AB'    : self.attack_boost,
             'CE'    : self.critical_eye,
             'WEX'   : self.weakness_exploit,
+            'CB'    : self.critical_boost,
+            'CD'    : self.critical_draw,
+            'RESENTMENT' : self.resentment,
         }
         self.weapon:                Weapon = weapon
         self.attack:                int = weapon.attack
@@ -41,7 +44,7 @@ class ArmorSet():
         effective_damage = sharpness_adjusted * (1 - affinity + self.crit_multiplier * affinity)
         return int(effective_damage)
 
-    # Damage altering skills
+    # Damage altering skills; these all change the instance attributes that influence damage.
     def attack_boost(self, level: int):
         if level in (0, 1, 2, 3):
             self.attack = int(self.attack + level*3)
@@ -53,7 +56,7 @@ class ArmorSet():
             self.attack = int(self.attack * 1.10 + 10)
 
     def critical_eye(self, level: int):
-        if level in range(0, 7):
+        if level in (1, 2, 3, 4, 5, 6):
             self.affinity = self.affinity + level*5
         elif level == 7:
             self.affinity = self.affinity + 40
@@ -63,6 +66,18 @@ class ArmorSet():
             self.affinity = self.affinity + 15*level
         elif level == 3:
             self.affinity = self.affinity + 50
+
+    def resentment(self, level: int):
+        if level in (1, 2, 3, 4, 5):
+            self.attack = self.attack + 5*level
+
+    def critical_boost(self, level: int):
+        if level in range(1, 2, 3):
+            self.crit_multiplier = self.crit_multiplier + 0.05*level
+
+    def critical_draw(self, level: int):
+        if level in (1, 2, 3):
+            self.affinity = self.affinity + 10*2**(level-1)
 
     # Special methods
     def __str__(self):
