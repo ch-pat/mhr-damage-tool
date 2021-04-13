@@ -8,7 +8,8 @@ class Weapon():
     'W': 1.32,
     'P': 1.44
     }
-    def __init__(self, attack: int, affinity: int, sharpness: str):
+    def __init__(self, attack: int, affinity: int, sharpness: str, name: str = 'NONAME'):
         self.attack: int = attack
         self.affinity: int = affinity
         self.sharpness_multiplier = Weapon.sharpness_values[sharpness.upper()]
+        self.name = name

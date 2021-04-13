@@ -2,7 +2,7 @@ from weapon import Weapon
 
 class ArmorSet():
     
-    def __init__(self, weapon: Weapon, active_skills: str):
+    def __init__(self, weapon: Weapon, active_skills: str, powercharm: bool = True, powertalon: bool = True):
         self.skills_dict = {
             'AB'    : self.attack_boost,
             'CE'    : self.critical_eye,
@@ -16,8 +16,11 @@ class ArmorSet():
         self.affinity:              int = weapon.affinity
         self.sharpness_multiplier:  float = weapon.sharpness_multiplier
         self.crit_multiplier:       float = 1.25
+        self.powercharm:            bool = powercharm
+        self.powertalon:            bool = powertalon
         self.active_skills:         dict = self.parse_skills(active_skills)
-        self.apply_skills()         # Applies skills to change the above stats
+        self.apply_skills()         # Applies skills to change the above stats 
+        self.apply_powercharms()    # Applies powercharm / powertalon buffs after skills
         self.effective_raw:         int = self.calculate_effective_raw()
 
     def parse_skills(self, skills: str) -> dict:
@@ -43,6 +46,12 @@ class ArmorSet():
         affinity = min(self.affinity, 100)/100
         effective_damage = sharpness_adjusted * (1 - affinity + self.crit_multiplier * affinity)
         return int(effective_damage)
+
+    def apply_powercharms(self):
+        if self.powercharm:
+            self.attack += 6
+        if self.powertalon:
+            self.attack += 9
 
     # Damage altering skills; these all change the instance attributes that influence damage.
     def attack_boost(self, level: int):
@@ -81,20 +90,55 @@ class ArmorSet():
 
     # Special methods
     def __str__(self):
-        out = f"Weapon equipped:\n\tAttack: {self.weapon.attack}, Affinity: {self.weapon.affinity}%, " \
+        out = f"------{self.weapon.name}------"
+        out += f"\n\nWeapon equipped:\n\tAttack: {self.weapon.attack}, Affinity: {self.weapon.affinity}%, " \
               f"Sharpness multiplier: {self.weapon.sharpness_multiplier}"
-        out += f"\nSkills affecting effective damage:"
+        out += f"\n\nSkills affecting effective damage:"
         out += f"\n\t"
         for skill in self.active_skills.keys():
             out += f" {skill}{self.active_skills[skill]},"
-        out += f"\nStats after skills:"
+        out += f"\n\nStats after skills:"
         out += f"\n\tAttack: {self.attack}, Affinity: {self.affinity}%, Sharpness multiplier: {self.sharpness_multiplier}"
         out += f"\n\tCrit multiplier: {self.crit_multiplier}"
-        out += f"\nEffective Raw: {self.effective_raw}"
+        out += f"\n\nEffective Raw: {self.effective_raw}\n"
         return out
 
-if __name__ == "__main__":
-    goss_gs = Weapon(230, -9, 'b')
+def compare_armorsets(weapons: list, skillsets: list, verbose: bool = False):
+    '''
+    If verbose prints every set detail, otherwise only prints the best.
+    '''
+    best = ArmorSet(Weapon(0, 0, 'R'), '')
+    analyzed = []
+    for weapon in weapons:
+        for skillset in skillsets:
+            current = ArmorSet(weapon, skillset)
+            analyzed += [current]
+            if current.effective_raw > best.effective_raw:
+                best = current
+    if verbose:
+        analyzed = sorted(analyzed, key=lambda x: x.effective_raw)
+        for armorset in analyzed:
+            print(f"{armorset.weapon.name} with {armorset.active_skills.keys()} = {armorset.effective_raw}")
+    return best
 
-    armor = ArmorSet(goss_gs, 'AB7 WEX3 CE2 Focus3')
-    print(armor)
+if __name__ == "__main__":
+    weapons = [
+        Weapon(230, -9, 'b',  name='Goss +6 aff'),
+        Weapon(218, -15, 'w', name='tig +8 att'),
+        Weapon(210, -9, 'w',  name='tig + 6 aff'),
+        Weapon(188, 35, 'w',  name='narga +8 att'),
+        Weapon(180, 41, 'w',  name='narga + 6 aff'),
+    ]
+
+    skillsets = [
+        'AB7 WEX3 CE2 Focus3',
+        'AB7 WEX3 RESENTMENT2 FOCUS3'
+    ]
+
+    print(compare_armorsets(weapons, skillsets, True))
+    # Tigrex with 387 is highest with normal skillset
+    #print(ArmorSet(goss_gs, basic_skillset))
+    #print(ArmorSet(tigrex_gs, basic_skillset))
+    #print(ArmorSet(tig_aff, basic_skillset))
+    #print(ArmorSet(narga_gs, basic_skillset))
+    #print(ArmorSet(narga_aff, basic_skillset))
