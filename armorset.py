@@ -82,7 +82,7 @@ class ArmorSet():
             self.attack = self.attack + 5*level
 
     def critical_boost(self, level: int):
-        if level in range(1, 2, 3):
+        if level in (1, 2, 3):
             self.crit_multiplier = self.crit_multiplier + 0.05*level
 
     def critical_draw(self, level: int):
@@ -124,21 +124,34 @@ def compare_armorsets(weapons: list, skillsets: list, verbose: bool = False):
 
 if __name__ == "__main__":
     weapons = [
-        Weapon(230, -9, 'b',  name='Goss +6 aff'),
-        Weapon(218, -15, 'w', name='tig +8 att'),
-        Weapon(210, -9, 'w',  name='tig + 6 aff'),
-        Weapon(188, 35, 'w',  name='narga +8 att'),
-        Weapon(180, 41, 'w',  name='narga + 6 aff'),
+        Weapon(230, -9, 'b',  name='goss    +6 aff'),
+        Weapon(218, -15, 'w', name='tigrex  +8 att'),
+        Weapon(210, -9, 'w',  name='tigrex  +6 aff'),
+        Weapon(188, 35, 'w',  name='narga   +8 att'),
+        Weapon(180, 41, 'w',  name='narga   +6 aff'),
     ]
 
     skillsets = [
         'AB7 WEX3 CE2 Focus3',
         'AB7 WEX3 RESENTMENT2 Focus3',
         'AB7 WEX3 CB1 Focus3',
-        'AB7 WEX3 CE3 Focus3'
+        'AB7 WEX3 CE3 Focus3',
+        'AB6 WEX3 CB2 Focus3',
+        'AB4 WEX3 CB3 Focus3',
     ]
 
-    print(compare_armorsets(weapons, skillsets, True))
+    experimental_skillsets = [
+        'AB6 WEX3 CB3 Focus3',  # Requires WEX2 CB1 talisman --> very unlikely | this is where Narga becomes best
+        'AB7 WEX3 CB3 Focus3',  # Requires WEX2 CB2 talisman --> extremely unlikely
+        # Best possible talisman is CB2 WEX2 3-1-1
+        # The following are experiments with the best charm
+        'AB7 WEX3 CB3 CE2 Focus3',
+        'AB6 WEX3 CB3 CE3 Focus3', 
+        'AB5 WEX3 CB3 CE4 Focus3'
+    ]
+
+    print(compare_armorsets(weapons, experimental_skillsets, True))
+
     # Tigrex with 387 is highest with normal skillset
     #print(ArmorSet(goss_gs, basic_skillset))
     #print(ArmorSet(tigrex_gs, basic_skillset))
