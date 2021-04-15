@@ -2,7 +2,8 @@ from weapon import Weapon
 
 class ArmorSet():
     
-    def __init__(self, weapon: Weapon, active_skills: str, powercharm: bool = True, powertalon: bool = True):
+    def __init__(self, weapon: Weapon, active_skills: str, 
+    powercharm: bool = True, powertalon: bool = True, dango_booster : bool = True):
         self.skills_dict = {
             'AB'    : self.attack_boost,
             'CE'    : self.critical_eye,
@@ -18,10 +19,11 @@ class ArmorSet():
         self.crit_multiplier:       float = 1.25
         self.powercharm:            bool = powercharm
         self.powertalon:            bool = powertalon
+        self.dango_booster:         bool = dango_booster
         self.active_skills_string:  str = active_skills
         self.active_skills:         dict = self.parse_skills(active_skills)
         self.apply_skills()         # Applies skills to change the above stats 
-        self.apply_powercharms()    # Applies powercharm / powertalon buffs after skills
+        self.apply_flat_buffs()    # Applies powercharm / powertalon / dango booster buffs after skills
         self.effective_raw:         int = self.calculate_effective_raw()
 
     def parse_skills(self, skills: str) -> dict:
@@ -48,10 +50,12 @@ class ArmorSet():
         effective_damage = sharpness_adjusted * (1 - affinity + self.crit_multiplier * affinity)
         return int(effective_damage)
 
-    def apply_powercharms(self):
+    def apply_flat_buffs(self):
         if self.powercharm:
             self.attack += 6
         if self.powertalon:
+            self.attack += 9
+        if self.dango_booster:
             self.attack += 9
 
     # Damage altering skills; these all change the instance attributes that influence damage.
