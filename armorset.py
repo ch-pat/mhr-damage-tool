@@ -3,7 +3,9 @@ from weapon import Weapon
 class ArmorSet():
     
     def __init__(self, weapon: Weapon, active_skills: str, 
-    powercharm: bool = True, powertalon: bool = True, dango_booster : bool = True):
+    powercharm: bool = True, powertalon: bool = True,
+    might_seed: bool = True,
+    dango_booster : bool = True):
         self.skills_dict = {
             'AB'    : self.attack_boost,
             'CE'    : self.critical_eye,
@@ -20,10 +22,11 @@ class ArmorSet():
         self.powercharm:            bool = powercharm
         self.powertalon:            bool = powertalon
         self.dango_booster:         bool = dango_booster
+        self.might_seed:            bool = might_seed
         self.active_skills_string:  str = active_skills
         self.active_skills:         dict = self.parse_skills(active_skills)
         self.apply_skills()         # Applies skills to change the above stats 
-        self.apply_flat_buffs()    # Applies powercharm / powertalon / dango booster buffs after skills
+        self.apply_flat_buffs()     # Applies powercharm / powertalon / dango booster buffs after skills
         self.effective_raw:         int = self.calculate_effective_raw()
 
     def parse_skills(self, skills: str) -> dict:
@@ -57,6 +60,8 @@ class ArmorSet():
             self.attack += 9
         if self.dango_booster:
             self.attack += 9
+        if self.might_seed:
+            self.attack += 10
 
     # Damage altering skills; these all change the instance attributes that influence damage.
     def attack_boost(self, level: int):
@@ -154,7 +159,7 @@ if __name__ == "__main__":
         'AB5 WEX3 CB3 CE4 Focus3'
     ]
 
-    print(compare_armorsets(weapons, experimental_skillsets, True))
+    print(compare_armorsets(weapons, skillsets, True))
 
     # Tigrex with 387 is highest with normal skillset
     #print(ArmorSet(goss_gs, basic_skillset))
