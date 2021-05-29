@@ -8,11 +8,13 @@ class ArmorSet():
     dango_booster : bool = True):
         self.skills_dict = {
             'AB'    : self.attack_boost,
+            'RESUSCITATE': self.resuscitate,
             'CE'    : self.critical_eye,
             'WEX'   : self.weakness_exploit,
             'CB'    : self.critical_boost,
             'CD'    : self.critical_draw,
             'RESENTMENT' : self.resentment,
+            'DRAGONHEART': self.dragonheart,
         }
         self.weapon:                Weapon = weapon
         self.attack:                int = weapon.attack
@@ -42,10 +44,20 @@ class ArmorSet():
         return active_skills
 
     def apply_skills(self):
+        # Apply skills that change base stats
+        # Apply percent increases first
+        percent = ['AB', 'DRAGONHEART']
+        for skill in percent:
+            if skill in self.active_skills.keys():
+                skill_method = self.skills_dict[skill]
+                skill_level = self.active_skills[skill]
+                skill_method(skill_level)
+
         for skill in self.active_skills.keys():
-            skill_method = self.skills_dict[skill]
-            skill_level = self.active_skills[skill]
-            skill_method(skill_level)
+            if skill not in percent:
+                skill_method = self.skills_dict[skill]
+                skill_level = self.active_skills[skill]
+                skill_method(skill_level)
 
     def calculate_effective_raw(self) -> int:
         sharpness_adjusted = self.attack*self.sharpness_multiplier
@@ -54,6 +66,7 @@ class ArmorSet():
         return int(effective_damage)
 
     def apply_flat_buffs(self):
+        # Applies buffs that take place after armor skill calculations
         if self.powercharm:
             self.attack += 6
         if self.powertalon:
@@ -98,6 +111,14 @@ class ArmorSet():
         if level in (1, 2, 3):
             self.affinity = self.affinity + 10*2**(level-1)
 
+    def resuscitate(self, level: int):
+        if level in (1, 2, 3):
+            self.attack = self.attack + 5*2**(level-1)
+
+    def dragonheart(self, level: int):
+        if level in (4, 5):
+            self.attack = self.attack * (1.00 + 0.05 * (level - 3))
+
     # Special methods
     def __str__(self):
         out = f"------{self.weapon.name}------"
@@ -128,40 +149,63 @@ def compare_armorsets(weapons: list, skillsets: list, verbose: bool = False):
     if verbose:
         analyzed = sorted(analyzed, key=lambda x: x.effective_raw)
         for armorset in analyzed:
-            print(f"{armorset.weapon.name}\twith {armorset.active_skills_string}\t\t= {armorset.effective_raw}")
+            print(f"{armorset.weapon.name}\twith {armorset.active_skills_string}\t\t= {armorset.effective_raw} EFR, = {armorset.effective_raw/armorset.weapon.effective_raw:.2f}x EFR boost from skills.")
     return best
 
 if __name__ == "__main__":
-    weapons = [
+    weapons_2slot = [
         Weapon(230, -9, 'b',  name='goss    +6 aff'),
-        Weapon(218, -15, 'w', name='tigrex  +8 att'),
-        Weapon(210, -9, 'w',  name='tigrex  +6 aff'),
         Weapon(188, 35, 'w',  name='narga   +8 att'),
         Weapon(180, 41, 'w',  name='narga   +6 aff'),
     ]
 
-    skillsets = [
+    weapons_noslot = [
+        Weapon(230, -9, 'b',  name='goss    +6 aff'),
+        Weapon(188, 35, 'w',  name='narga   +8 att'),
+        Weapon(180, 41, 'w',  name='narga   +6 aff'),
+        Weapon(218, -15, 'w', name='tigrex  +8 att'),
+        Weapon(210, -9, 'w',  name='tigrex  +6 aff'),
+        Weapon(190, 20, 'w',  name="Rampage S4 NEB Aff"),
+        Weapon(220, -30, 'w', name="Rampage S4 NEB Att"),
+        Weapon(250, -30, 'b', name="Rampage At NEB Att"),
+        Weapon(220, 20, 'b',  name="Rampage At NEB Aff"),
+        Weapon(190, 20, 'w',  name="Rampage S4 NEB"),
+    ]
+
+    skillsets_noslot = [
         'AB7 WEX3 CE2 Focus3',
         'AB7 WEX3 RESENTMENT2 Focus3',
         'AB7 WEX3 CB1 Focus3',
         'AB7 WEX3 CE3 Focus3',
         'AB6 WEX3 CB2 Focus3',
         'AB4 WEX3 CB3 Focus3',
+        'AB7 WEX3 CB3 Focus3',
+        'AB4 WEX3 CB3 Focus3 CE6',
+        'AB5 WEX3 CB3 Focus3 CE4',
+        'AB6 WEX3 CB3 Focus3 CE3',
+        'DRAGONHEART5 RESENTMENT3 RESUSCITATE3 WEX3 CB3 Focus3 CE1',
+
     ]
 
-    experimental_skillsets = [
-        'AB6 WEX3 CB3 Focus3',  # Requires WEX2 CB1 talisman --> very unlikely | this is where Narga becomes best
-        'AB7 WEX3 CB3 Focus3',  # Requires WEX2 CB2 talisman --> extremely unlikely
-        # Best possible talisman is CB2 WEX2 3-1-1
-        # The following are experiments with the best charm
-        'AB7 WEX3 CB3 CE2 Focus3',
-        'AB6 WEX3 CB3 CE3 Focus3', 
-        'AB5 WEX3 CB3 CE4 Focus3'
+    skillsets_2slot = [
+        'AB6 WEX3 CB3 Focus3 CE5',
+        'AB7 WEX3 CB3 Focus3 CE3',
+        'AB4 WEX3 CB3 Focus3 CE7',
+        'DRAGONHEART5 RESENTMENT3 RESUSCITATE3 WEX3 CB3 Focus3 CE2',
+
     ]
 
-    print(compare_armorsets(weapons, skillsets, True))
+    utility_skillsets = [
+        'Partbreaker3, GoodLuck3, Focus3, MindsEye3, EvadeWindow2',
+        'AB7 WEX3 CB3 Focus3',
+    ]
 
-    # Tigrex with 387 is highest with normal skillset
+    print("Best no slot weapons:")
+    print(compare_armorsets(weapons_noslot, skillsets_noslot, True))
+
+    print("Best 2-0-0 weapons:")
+    print(compare_armorsets(weapons_2slot, skillsets_2slot, True))
+
     #print(ArmorSet(goss_gs, basic_skillset))
     #print(ArmorSet(tigrex_gs, basic_skillset))
     #print(ArmorSet(tig_aff, basic_skillset))
