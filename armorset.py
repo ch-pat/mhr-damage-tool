@@ -46,7 +46,7 @@ class ArmorSet():
     def apply_skills(self):
         # Apply skills that change base stats
         # Apply percent increases first
-        percent = ['AB', 'DRAGONHEART']
+        percent = ['DRAGONHEART', 'AB']
         for skill in percent:
             if skill in self.active_skills.keys():
                 skill_method = self.skills_dict[skill]
